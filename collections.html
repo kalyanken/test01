@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collections — AURÈLE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Tenor+Sans&display=swap" rel="stylesheet">
+<style>/* ═══════════════════════════════════════
+   AURÈLE — SHARED STYLES
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bone:      #F7F3EE;
+  --paper:     #EDE8E0;
+  --linen:     #E0D8CD;
+  --bronze:    #9A7B4F;
+  --bronze-lt: #C4A06A;
+  --ink:       #18140F;
+  --ash:       #9C9488;
+  --faint:     rgba(24,20,15,0.08);
+  --pad-x:     clamp(20px, 5vw, 64px);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Tenor Sans', sans-serif; background: var(--bone); color: var(--ink); overflow-x: hidden; }
+img, svg { display: block; max-width: 100%; }
+
+/* CURSOR */
+#cur, #cur-circle { display: none; }
+@media (pointer: fine) {
+  body { cursor: none; }
+  #cur { display: block; position: fixed; pointer-events: none; z-index: 9999; width: 5px; height: 5px; background: var(--ink); border-radius: 50%; transform: translate(-50%,-50%); }
+  #cur-circle { display: block; position: fixed; pointer-events: none; z-index: 9998; width: 44px; height: 44px; border: 1px solid var(--bronze); border-radius: 50%; transform: translate(-50%,-50%); transition: width .3s, height .3s, opacity .3s; opacity: .6; }
+}
+
+/* GRAIN */
+body::after { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 8000; mix-blend-mode: multiply; opacity: .5; }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; display: flex; align-items: center; justify-content: space-between; padding: 28px var(--pad-x); transition: padding .4s, background .4s, border-color .4s; border-bottom: 1px solid transparent; }
+nav.pinned { padding: 18px var(--pad-x); background: rgba(247,243,238,0.95); backdrop-filter: blur(16px) saturate(1.2); border-color: var(--faint); }
+.logo { font-family: 'EB Garamond', serif; font-size: clamp(14px,2.5vw,18px); letter-spacing: .36em; text-transform: uppercase; color: var(--ink); text-decoration: none; flex-shrink: 0; z-index: 600; }
+.logo sup { font-size: 8px; color: var(--bronze); letter-spacing: .1em; vertical-align: super; margin-left: 3px; }
+.nav-center { display: none; gap: 44px; position: absolute; left: 50%; transform: translateX(-50%); }
+.nav-center a { font-size: 9.5px; letter-spacing: .28em; text-transform: uppercase; color: var(--ash); text-decoration: none; transition: color .3s; white-space: nowrap; }
+.nav-center a:hover, .nav-center a.active { color: var(--ink); }
+.nav-center a.active { border-bottom: 1px solid var(--bronze); padding-bottom: 2px; }
+.nav-right { display: none; gap: 24px; align-items: center; }
+.nav-right a { font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--ash); text-decoration: none; transition: color .3s; white-space: nowrap; }
+.nav-right a:hover { color: var(--bronze); }
+.hamburger { display: flex; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; z-index: 600; }
+.hamburger span { display: block; width: 24px; height: 1px; background: var(--ink); transition: transform .35s ease, opacity .35s ease, width .35s ease; transform-origin: center; }
+.mobile-menu { position: fixed; inset: 0; z-index: 550; background: var(--bone); display: flex; flex-direction: column; justify-content: center; padding: 80px var(--pad-x); opacity: 0; pointer-events: none; transform: translateY(-12px); transition: opacity .4s ease, transform .4s ease; }
+.mobile-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.mobile-menu a { font-family: 'EB Garamond', serif; font-size: clamp(26px,6vw,40px); font-weight: 400; color: var(--ink); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--faint); letter-spacing: .04em; transition: color .3s, padding-left .3s; display: block; }
+.mobile-menu a:hover { color: var(--bronze); padding-left: 12px; }
+.mobile-menu-sub { margin-top: 36px; display: flex; gap: 28px; flex-wrap: wrap; }
+.mobile-menu-sub a { font-family: 'Tenor Sans', sans-serif; font-size: 9px; letter-spacing: .35em; text-transform: uppercase; color: var(--ash); border: none; padding: 0; font-size: 9px; }
+body.nav-open .hamburger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+body.nav-open .hamburger span:nth-child(2) { opacity: 0; width: 0; }
+body.nav-open .hamburger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+@media (min-width: 900px) { .nav-center { display: flex; } .nav-right { display: flex; } .hamburger { display: none; } .mobile-menu { display: none; } }
+
+/* PAGE HERO (inner pages) */
+.page-hero { padding: clamp(120px,18vw,180px) var(--pad-x) clamp(60px,8vw,100px); position: relative; overflow: hidden; border-bottom: 1px solid var(--faint); }
+.page-hero-eyebrow { font-size: 9px; letter-spacing: .44em; text-transform: uppercase; color: var(--bronze); margin-bottom: 24px; opacity: 0; animation: fadeSlide .8s ease .3s forwards; }
+.page-hero-title { font-family: 'EB Garamond', serif; font-size: clamp(42px,7vw,96px); font-weight: 400; line-height: .96; letter-spacing: -.01em; max-width: 780px; margin-bottom: 32px; opacity: 0; animation: fadeSlide .8s ease .5s forwards; }
+.page-hero-title em { font-style: italic; color: var(--bronze); }
+.page-hero-sub { font-size: clamp(11px,1.4vw,13px); line-height: 2; letter-spacing: .06em; color: var(--ash); max-width: 420px; opacity: 0; animation: fadeSlide .8s ease .7s forwards; }
+.page-hero-numeral { position: absolute; right: -10px; bottom: -40px; font-family: 'EB Garamond', serif; font-size: clamp(140px,20vw,320px); font-weight: 400; color: rgba(154,123,79,0.05); line-height: 1; pointer-events: none; user-select: none; letter-spacing: -.05em; }
+
+/* DIVIDER */
+.divider { display: flex; align-items: center; gap: 24px; padding: 0 var(--pad-x); }
+.divider-line { flex: 1; height: 1px; background: var(--faint); }
+.divider-mark { font-family: 'EB Garamond', serif; font-size: 10px; letter-spacing: .32em; color: var(--bronze); text-transform: uppercase; white-space: nowrap; }
+
+/* SECTION UTILITIES */
+.section { padding: clamp(64px,10vw,120px) var(--pad-x); }
+.section-label { font-size: 8.5px; letter-spacing: .44em; text-transform: uppercase; color: var(--bronze); margin-bottom: 20px; display: block; }
+.section-title { font-family: 'EB Garamond', serif; font-size: clamp(28px,3.8vw,52px); font-weight: 400; line-height: 1.1; }
+.section-title em { font-style: italic; color: var(--bronze); }
+
+/* BUTTONS */
+.btn-dark { font-size: 9px; letter-spacing: .32em; text-transform: uppercase; color: var(--bone); background: var(--ink); text-decoration: none; padding: 16px clamp(20px,3vw,40px); display: inline-block; transition: background .3s; white-space: nowrap; }
+.btn-dark:hover { background: var(--bronze); }
+.btn-ghost { font-size: 9px; letter-spacing: .28em; text-transform: uppercase; color: var(--ash); text-decoration: none; border-bottom: 1px solid var(--linen); padding-bottom: 4px; transition: color .3s, border-color .3s; white-space: nowrap; display: inline-block; }
+.btn-ghost:hover { color: var(--ink); border-color: var(--ink); }
+.btn-arrow { display: inline-flex; align-items: center; gap: 18px; font-size: 9.5px; letter-spacing: .35em; text-transform: uppercase; color: var(--ink); text-decoration: none; transition: gap .3s; }
+.btn-arrow::after { content: '——'; color: var(--bronze); font-size: 11px; }
+.btn-arrow:hover { gap: 28px; }
+
+/* FOOTER */
+footer { background: var(--ink); padding: clamp(52px,8vw,80px) var(--pad-x) clamp(28px,4vw,44px); }
+.footer-top { display: grid; grid-template-columns: 1fr; gap: 44px; padding-bottom: 44px; border-bottom: 1px solid rgba(247,243,238,.07); margin-bottom: 32px; }
+@media (min-width: 600px) { .footer-top { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 900px) { .footer-top { grid-template-columns: 2fr 1fr 1fr; } }
+.footer-logo { font-family: 'EB Garamond', serif; font-size: clamp(15px,2.5vw,20px); letter-spacing: .32em; color: var(--bone); text-decoration: none; display: block; margin-bottom: 16px; }
+.footer-logo span { color: var(--bronze); }
+.footer-line { font-size: 11px; color: rgba(156,148,136,.4); letter-spacing: .06em; line-height: 1.9; max-width: 260px; margin-bottom: 28px; }
+.footer-col h5 { font-size: 8px; letter-spacing: .42em; text-transform: uppercase; color: var(--bronze); margin-bottom: 18px; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 11px; }
+.footer-col a { font-size: 11px; color: rgba(156,148,136,.45); text-decoration: none; letter-spacing: .05em; transition: color .3s; }
+.footer-col a:hover { color: var(--bone); }
+.footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; }
+.footer-bottom p { font-size: 9px; letter-spacing: .13em; color: rgba(156,148,136,.28); }
+.footer-social { display: flex; flex-wrap: wrap; gap: 22px; }
+.footer-social a { font-size: 8.5px; letter-spacing: .28em; text-transform: uppercase; color: rgba(156,148,136,.28); text-decoration: none; transition: color .3s; }
+.footer-social a:hover { color: var(--bronze); }
+
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-l { opacity: 0; transform: translateX(-24px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+.reveal-l.visible { opacity: 1; transform: translateX(0); }
+
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+.filter-bar { display:flex; gap:24px; flex-wrap:wrap; padding: 0 var(--pad-x); margin-bottom: 48px; align-items:center; }
+.filter-btn { font-size:8.5px; letter-spacing:.32em; text-transform:uppercase; background:none; border:none; cursor:pointer; color:var(--ash); padding:8px 0; border-bottom:1px solid transparent; transition:color .3s,border-color .3s; font-family:'Tenor Sans',sans-serif; }
+.filter-btn:hover,.filter-btn.on { color:var(--ink); border-color:var(--bronze); }
+.archive-grid { display:grid; grid-template-columns:1fr; gap:1px; background:var(--faint); padding:0 var(--pad-x); }
+@media(min-width:600px){ .archive-grid{ grid-template-columns:1fr 1fr; } }
+@media(min-width:1000px){ .archive-grid{ grid-template-columns:repeat(3,1fr); } }
+.archive-card { background:var(--bone); position:relative; overflow:hidden; cursor:pointer; }
+.archive-card:hover .archive-img { transform:scale(1.04); }
+.archive-img { aspect-ratio:3/4; background:var(--paper); display:flex; align-items:center; justify-content:center; transition:transform .7s cubic-bezier(.16,1,.3,1); overflow:hidden; position:relative; }
+.archive-img-dark { background:#1E1B17; }
+.archive-img-mid  { background:#D4C8B8; }
+.archive-overlay { position:absolute; inset:0; background:rgba(24,20,15,0); transition:background .4s; display:flex; align-items:flex-end; padding:24px; }
+.archive-card:hover .archive-overlay { background:rgba(24,20,15,0.06); }
+.archive-info { padding:24px 28px 32px; border-top:1px solid var(--faint); }
+.archive-season { font-size:8px; letter-spacing:.35em; text-transform:uppercase; color:var(--bronze); margin-bottom:8px; }
+.archive-name { font-family:'EB Garamond',serif; font-size:clamp(18px,2.2vw,24px); font-weight:400; margin-bottom:4px; }
+.archive-name em { font-style:italic; }
+.archive-type { font-size:9.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--ash); margin-bottom:12px; }
+.archive-price { font-family:'EB Garamond',serif; font-size:18px; color:var(--ink); }
+.archive-status { display:inline-flex; align-items:center; gap:7px; font-size:8px; letter-spacing:.28em; text-transform:uppercase; color:var(--ash); margin-top:10px; }
+.dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.dot-available { background:#8BAF7C; }
+.dot-limited   { background:var(--bronze); }
+.dot-sold      { background:#B08080; }
+.current-banner { background:var(--ink); margin:0 var(--pad-x) 1px; padding:clamp(32px,4vw,48px); display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:20px; }
+.current-banner p { font-size:9px; letter-spacing:.38em; text-transform:uppercase; color:var(--bronze); }
+.current-banner h3 { font-family:'EB Garamond',serif; font-size:clamp(20px,2.5vw,28px); color:var(--bone); font-weight:400; font-style:italic; }
+</style>
+</head>
+<body>
+<div id="cur"></div><div id="cur-circle"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="maison.html">Maison</a><a href="collections.html">Collections</a><a href="atelier.html">Atelier</a>
+  <a href="commissions.html">Commissions</a><a href="private-client.html">Private Client</a><a href="contact.html">Contact</a>
+  <div class="mobile-menu-sub"><a href="#">Instagram</a><a href="private-client.html">Reserve</a></div>
+</div>
+<nav id="nav">
+  <a class="logo" href="index.html">AURÈLE<sup>®</sup></a>
+  <div class="nav-center">
+    <a href="maison.html" class="">Maison</a>
+    <a href="collections.html" class="active">Collections</a>
+    <a href="atelier.html" class="">Atelier</a>
+    <a href="commissions.html" class="">Commissions</a>
+  </div>
+  <div class="nav-right"><a href="private-client.html">Private Client</a><a href="contact.html">Contact</a></div>
+  <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+</nav>
+
+<section class="page-hero">
+  <p class="page-hero-eyebrow">Every piece, every quarter</p>
+  <h1 class="page-hero-title">The Complete<br><em>Archive</em></h1>
+  <p class="page-hero-sub">Every piece Aurèle has offered since the quarterly model began. Each one made, each one signed, each one — somewhere — still in use.</p>
+  <div class="page-hero-numeral">247</div>
+</section>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-mark">Q II 2026 — Current</div><div class="divider-line"></div></div>
+
+<section style="padding:clamp(48px,7vw,80px) 0">
+  <div class="current-banner">
+    <div>
+      <p>Now Available</p>
+      <h3>Q II 2026 — Three Pieces</h3>
+    </div>
+    <a href="index.html" class="btn-dark" style="background:var(--bronze)">View This Quarter</a>
+  </div>
+  
+  <div style="padding:24px var(--pad-x) 0">
+    <div class="filter-bar">
+      <button class="filter-btn on">All Pieces</button>
+      <button class="filter-btn">Totes</button>
+      <button class="filter-btn">Evening</button>
+      <button class="filter-btn">Box Bags</button>
+      <button class="filter-btn">Bucket</button>
+      <button class="filter-btn">Sold Out</button>
+    </div>
+  </div>
+
+  <div class="archive-grid">
+
+    <div class="archive-card reveal">
+      <div class="archive-img"><svg viewBox="0 0 200 240" width="120" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 24px 40px rgba(24,20,15,0.2))">
+  <path d="M62 68Q62 34 100 34Q138 34 138 68" stroke="#9A7B4F" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <rect x="28" y="74" width="144" height="148" rx="3" fill="#C8A870"/>
+  <rect x="28" y="74" width="144" height="148" rx="3" fill="url(#ts)" opacity=".5"/>
+  <rect x="36" y="82" width="128" height="130" rx="2" fill="none" stroke="rgba(154,100,40,.25)" stroke-width="1.2" stroke-dasharray="4 3.5"/>
+  <rect x="88" y="138" width="24" height="16" rx="1.5" fill="#9A7B4F"/>
+  <circle cx="100" cy="146" r="3.5" fill="#C4A06A"/>
+  <defs><linearGradient id="ts" x1="28" y1="74" x2="172" y2="222" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="white" stop-opacity=".25"/><stop offset="100%" stop-color="black" stop-opacity=".2"/></linearGradient></defs>
+</svg></div>
+      <div class="archive-info">
+        <p class="archive-season">Q II 2026</p>
+        <h3 class="archive-name">La <em>Dune</em></h3>
+        <p class="archive-type">Structured Tote · Sablé Calfskin</p>
+        <p class="archive-price">$6,800</p>
+        <div class="archive-status"><div class="dot dot-limited"></div>4 of 12 remaining</div>
+      </div>
+    </div>
+
+    <div class="archive-card reveal">
+      <div class="archive-img archive-img-dark"><svg viewBox="0 0 200 240" width="110" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 24px 40px rgba(0,0,0,0.4))">
+  <rect x="22" y="88" width="156" height="124" rx="2" fill="#1A1510"/>
+  <path d="M22 88 L22 148 L100 164 L178 148 L178 88 Z" fill="rgba(0,0,0,.3)"/>
+  <circle cx="100" cy="158" r="10" fill="#9A7B4F"/><circle cx="100" cy="158" r="6.5" fill="#7A5E38"/><circle cx="100" cy="158" r="2.5" fill="#C4A06A"/>
+  <rect x="30" y="96" width="140" height="108" rx="1" fill="none" stroke="rgba(196,160,106,.12)" stroke-width="1" stroke-dasharray="4 3.5"/>
+</svg></div>
+      <div class="archive-info">
+        <p class="archive-season">Q II 2026</p>
+        <h3 class="archive-name">L'<em>Ombre</em></h3>
+        <p class="archive-type">Evening Flap · Smoked Patent</p>
+        <p class="archive-price">$9,400</p>
+        <div class="archive-status"><div class="dot dot-sold"></div>Sold out</div>
+      </div>
+    </div>
+
+    <div class="archive-card reveal">
+      <div class="archive-img archive-img-mid"><svg viewBox="0 0 200 240" width="115" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 24px 40px rgba(24,20,15,0.2))">
+  <rect x="34" y="80" width="132" height="132" rx="2" fill="#6B5040"/>
+  <rect x="34" y="80" width="132" height="40" rx="2" fill="#7A5D48"/>
+  <path d="M34 80 L22 92 L22 222 L34 212 Z" fill="#5A4235"/>
+  <path d="M166 80 L178 92 L178 222 L166 212 Z" fill="#5A4235"/>
+  <rect x="88" y="98" width="24" height="16" rx="2" fill="#9A7B4F"/>
+  <path d="M93 98L93 92Q100 86 107 92L107 98" stroke="#9A7B4F" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="100" cy="106" r="3" fill="#C4A06A"/>
+  <rect x="82" y="66" width="36" height="18" rx="9" fill="none" stroke="#9A7B4F" stroke-width="4"/>
+  <rect x="40" y="86" width="120" height="118" rx="1" fill="none" stroke="rgba(154,123,79,.2)" stroke-width="1" stroke-dasharray="4 3.5"/>
+</svg></div>
+      <div class="archive-info">
+        <p class="archive-season">Q II 2026</p>
+        <h3 class="archive-name">La <em>Boîte</em></h3>
+        <p class="archive-type">Box Bag · Grain-de-Poudre Calf</p>
+        <p class="archive-price">$11,200</p>
+        <div class="archive-status"><div class="dot dot-available"></div>6 of 6 available</div>
+      </div>
+    </div>
+
+    <div class="archive-card reveal">
+      <div class="archive-img"><svg viewBox="0 0 200 240" width="120" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 24px 40px rgba(24,20,15,0.15))">
+  <rect x="30" y="60" width="140" height="150" rx="70" fill="#7A6B5A"/>
+  <ellipse cx="100" cy="60" rx="70" ry="20" fill="#6B5C4C"/>
+  <path d="M62 24L68 60M138 24L132 60" stroke="#8A7260" stroke-width="5" stroke-linecap="round"/>
+  <ellipse cx="100" cy="36" rx="12" ry="8" fill="#6B5C4C"/>
+  <text x="100" y="160" text-anchor="middle" font-family="serif" font-size="8" fill="#9A7B4F" letter-spacing="3" opacity=".6">AURÈLE</text>
+</svg></div>
+      <div class="archive-info">
+        <p class="archive-season">Q I 2026</p>
+        <h3 class="archive-name">Le <em>Seau</em></h3>
+        <p class="archive-type">Bucket · Warm Taupe Calfskin</p>
+        <p class="archive-price">$5,200</p>
+        <div class="archive-status"><div class="dot dot-sold"></div>Sold out</div>
+      </div>
+    </div>
+
+    <div class="archive-card reveal">
+      <div class="archive-img"><svg viewBox="0 0 200 240" width="100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 24px 40px rgba(24,20,15,0.18))">
+  <path d="M72 90Q72 54 100 54Q128 54 128 90" stroke="#C4A06A" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <rect x="38" y="96" width="124" height="120" rx="3" fill="#C8A870"/>
+  <rect x="38" y="96" width="124" height="120" rx="3" fill="url(#ms)" opacity=".4"/>
+  <rect x="46" y="104" width="108" height="104" rx="2" fill="none" stroke="rgba(154,100,40,.25)" stroke-width="1" stroke-dasharray="3.5 3"/>
+  <rect x="82" y="150" width="36" height="22" rx="1.5" fill="#9A7B4F"/>
+  <circle cx="100" cy="161" r="3.5" fill="#C4A06A"/>
+  <defs><linearGradient id="ms" x1="38" y1="96" x2="162" y2="216" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="white" stop-opacity=".3"/><stop offset="100%" stop-color="black" stop-opacity=".15"/></linearGradient></defs>
+</svg></div>
+      <div class="archive-info">
+        <p class="archive-season">Q I 2026</p>
+        <h3 class="archive-name">La <em>Petite</em></h3>
+        <p class="archive-type">Mini Tote · Cognac Vachetta</p>
+        <p class="archive-price">$4,100</p>
+        <div class="archive-status"><div class="dot dot-sold"></div>Sold out</div>
+      </div>
+    </div>
+
+    <div class="archive-card reveal">
+      <div class="archive-img archive-img-dark"><svg viewBox="0 0 200 240" width="130" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 20px 36px rgba(24,20,15,0.2))">
+  <rect x="16" y="90" width="168" height="100" rx="3" fill="#B8A088"/>
+  <rect x="16" y="90" width="168" height="100" rx="3" fill="url(#cs)" opacity=".4"/>
+  <rect x="24" y="98" width="152" height="84" rx="2" fill="none" stroke="rgba(154,100,40,.22)" stroke-width="1" stroke-dasharray="4 3.5"/>
+  <path d="M16 90 L16 138 L100 152 L184 138 L184 90Z" fill="rgba(0,0,0,.18)"/>
+  <circle cx="100" cy="142" r="9" fill="#9A7B4F"/><circle cx="100" cy="142" r="5.5" fill="#7A5E38"/><circle cx="100" cy="142" r="2" fill="#C4A06A"/>
+  <defs><linearGradient id="cs" x1="16" y1="90" x2="184" y2="190" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="white" stop-opacity=".22"/><stop offset="100%" stop-color="black" stop-opacity=".12"/></linearGradient></defs>
+</svg></div>
+      <div class="archive-info">
+        <p class="archive-season">Q I 2026</p>
+        <h3 class="archive-name">L'<em>Enveloppe</em></h3>
+        <p class="archive-type">Clutch · Ivory Grained Leather</p>
+        <p class="archive-price">$3,800</p>
+        <div class="archive-status"><div class="dot dot-sold"></div>Sold out</div>
+      </div>
+    </div>
+
+    <div class="archive-card reveal">
+      <div class="archive-img archive-img-mid"><svg viewBox="0 0 200 240" width="120" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 24px 40px rgba(24,20,15,0.2))">
+  <path d="M62 68Q62 34 100 34Q138 34 138 68" stroke="#8A6A3A" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <rect x="28" y="74" width="144" height="148" rx="3" fill="#A07858"/>
+  <rect x="28" y="74" width="144" height="148" rx="3" fill="url(#ts)" opacity=".5"/>
+  <rect x="36" y="82" width="128" height="130" rx="2" fill="none" stroke="rgba(154,100,40,.25)" stroke-width="1.2" stroke-dasharray="4 3.5"/>
+  <rect x="88" y="138" width="24" height="16" rx="1.5" fill="#8A6A3A"/>
+  <circle cx="100" cy="146" r="3.5" fill="#C4A06A"/>
+  <defs><linearGradient id="ts" x1="28" y1="74" x2="172" y2="222" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="white" stop-opacity=".25"/><stop offset="100%" stop-color="black" stop-opacity=".2"/></linearGradient></defs>
+</svg></div>
+      <div class="archive-info">
+        <p class="archive-season">Q IV 2025</p>
+        <h3 class="archive-name">La <em>Terre</em></h3>
+        <p class="archive-type">Tote · Bark-Dyed Calfskin</p>
+        <p class="archive-price">$6,400</p>
+        <div class="archive-status"><div class="dot dot-sold"></div>Sold out</div>
+      </div>
+    </div>
+
+    <div class="archive-card reveal">
+      <div class="archive-img"><svg viewBox="0 0 200 240" width="110" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 24px 40px rgba(0,0,0,0.4))">
+  <rect x="22" y="88" width="156" height="124" rx="2" fill="#6B5040"/>
+  <path d="M22 88 L22 148 L100 164 L178 148 L178 88 Z" fill="rgba(0,0,0,.3)"/>
+  <circle cx="100" cy="158" r="10" fill="#9A7B4F"/><circle cx="100" cy="158" r="6.5" fill="#7A5E38"/><circle cx="100" cy="158" r="2.5" fill="#C4A06A"/>
+  <rect x="30" y="96" width="140" height="108" rx="1" fill="none" stroke="rgba(196,160,106,.12)" stroke-width="1" stroke-dasharray="4 3.5"/>
+</svg></div>
+      <div class="archive-info">
+        <p class="archive-season">Q IV 2025</p>
+        <h3 class="archive-name">La <em>Noisette</em></h3>
+        <p class="archive-type">Structured Flap · Hazel Grain</p>
+        <p class="archive-price">$7,900</p>
+        <div class="archive-status"><div class="dot dot-sold"></div>Sold out</div>
+      </div>
+    </div>
+
+    <div class="archive-card reveal">
+      <div class="archive-img archive-img-dark"><svg viewBox="0 0 200 240" width="115" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 24px 40px rgba(24,20,15,0.2))">
+  <rect x="34" y="80" width="132" height="132" rx="2" fill="#6B5040"/>
+  <rect x="34" y="80" width="132" height="40" rx="2" fill="#7A5D48"/>
+  <path d="M34 80 L22 92 L22 222 L34 212 Z" fill="#5A4235"/>
+  <path d="M166 80 L178 92 L178 222 L166 212 Z" fill="#5A4235"/>
+  <rect x="88" y="98" width="24" height="16" rx="2" fill="#9A7B4F"/>
+  <path d="M93 98L93 92Q100 86 107 92L107 98" stroke="#9A7B4F" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="100" cy="106" r="3" fill="#C4A06A"/>
+  <rect x="82" y="66" width="36" height="18" rx="9" fill="none" stroke="#9A7B4F" stroke-width="4"/>
+  <rect x="40" y="86" width="120" height="118" rx="1" fill="none" stroke="rgba(154,123,79,.2)" stroke-width="1" stroke-dasharray="4 3.5"/>
+</svg></div>
+      <div class="archive-info">
+        <p class="archive-season">Q IV 2025</p>
+        <h3 class="archive-name">Le <em>Coffret</em></h3>
+        <p class="archive-type">Box Bag · Burgundy Wax Calf</p>
+        <p class="archive-price">$10,400</p>
+        <div class="archive-status"><div class="dot dot-sold"></div>Sold out</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;padding:clamp(48px,6vw,80px) var(--pad-x)">
+    <p style="font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:var(--ash);margin-bottom:24px">9 of 247 pieces shown</p>
+    <a href="#" class="btn-arrow">Load Earlier Archive</a>
+  </div>
+
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div>
+      <a class="footer-logo" href="index.html">AURÈLE <span>®</span></a>
+      <p class="footer-line">Maison de Maroquinerie. Florence, since 1961. Three pieces. Every quarter. Nothing more.</p>
+    </div>
+    <div class="footer-col"><h5>Maison</h5><ul><li><a href="maison.html">Our History</a></li><li><a href="atelier.html">The Atelier</a></li><li><a href="collections.html">Archive</a></li><li><a href="contact.html">Press</a></li></ul></div>
+    <div class="footer-col"><h5>Client</h5><ul><li><a href="private-client.html">Private Access</a></li><li><a href="commissions.html">Bespoke Commission</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Maison Aurèle. Florence. All rights reserved.</p>
+    <div class="footer-social"><a href="#">Instagram</a><a href="#">Weibo</a><a href="#">Private Telegram</a></div>
+  </div>
+</footer>
+<script>/* ── CURSOR ── */
+if (window.matchMedia('(pointer: fine)').matches) {
+  const cur = document.getElementById('cur');
+  const ring = document.getElementById('cur-circle');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  (function loop(){ cur.style.left=mx+'px'; cur.style.top=my+'px'; rx+=(mx-rx)*.1; ry+=(my-ry)*.1; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(loop); })();
+  document.querySelectorAll('a,button,input,select,textarea').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ ring.style.width='72px'; ring.style.height='72px'; ring.style.opacity='.2'; cur.style.opacity='0'; });
+    el.addEventListener('mouseleave',()=>{ ring.style.width='44px'; ring.style.height='44px'; ring.style.opacity='.6'; cur.style.opacity='1'; });
+  });
+}
+/* ── HAMBURGER ── */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+if(hamburger){ hamburger.addEventListener('click', () => { document.body.classList.toggle('nav-open'); mobileMenu.classList.toggle('open'); }); }
+if(mobileMenu){ mobileMenu.querySelectorAll('a').forEach(a => { a.addEventListener('click', () => { document.body.classList.remove('nav-open'); mobileMenu.classList.remove('open'); }); }); }
+/* ── NAV PIN ── */
+window.addEventListener('scroll', () => { const n=document.getElementById('nav'); if(n) n.classList.toggle('pinned', scrollY>60); }, { passive: true });
+/* ── REVEALS ── */
+const io = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1 });
+document.querySelectorAll('.reveal,.reveal-l,.anim-item').forEach(el => io.observe(el));
+document.querySelectorAll('.stagger-item').forEach((el,i) => { el.style.transitionDelay=(i*0.1)+'s'; io.observe(el); });
+</script>
+</body></html>

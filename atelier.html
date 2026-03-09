@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atelier — AURÈLE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Tenor+Sans&display=swap" rel="stylesheet">
+<style>/* ═══════════════════════════════════════
+   AURÈLE — SHARED STYLES
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bone:      #F7F3EE;
+  --paper:     #EDE8E0;
+  --linen:     #E0D8CD;
+  --bronze:    #9A7B4F;
+  --bronze-lt: #C4A06A;
+  --ink:       #18140F;
+  --ash:       #9C9488;
+  --faint:     rgba(24,20,15,0.08);
+  --pad-x:     clamp(20px, 5vw, 64px);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Tenor Sans', sans-serif; background: var(--bone); color: var(--ink); overflow-x: hidden; }
+img, svg { display: block; max-width: 100%; }
+
+/* CURSOR */
+#cur, #cur-circle { display: none; }
+@media (pointer: fine) {
+  body { cursor: none; }
+  #cur { display: block; position: fixed; pointer-events: none; z-index: 9999; width: 5px; height: 5px; background: var(--ink); border-radius: 50%; transform: translate(-50%,-50%); }
+  #cur-circle { display: block; position: fixed; pointer-events: none; z-index: 9998; width: 44px; height: 44px; border: 1px solid var(--bronze); border-radius: 50%; transform: translate(-50%,-50%); transition: width .3s, height .3s, opacity .3s; opacity: .6; }
+}
+
+/* GRAIN */
+body::after { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 8000; mix-blend-mode: multiply; opacity: .5; }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; display: flex; align-items: center; justify-content: space-between; padding: 28px var(--pad-x); transition: padding .4s, background .4s, border-color .4s; border-bottom: 1px solid transparent; }
+nav.pinned { padding: 18px var(--pad-x); background: rgba(247,243,238,0.95); backdrop-filter: blur(16px) saturate(1.2); border-color: var(--faint); }
+.logo { font-family: 'EB Garamond', serif; font-size: clamp(14px,2.5vw,18px); letter-spacing: .36em; text-transform: uppercase; color: var(--ink); text-decoration: none; flex-shrink: 0; z-index: 600; }
+.logo sup { font-size: 8px; color: var(--bronze); letter-spacing: .1em; vertical-align: super; margin-left: 3px; }
+.nav-center { display: none; gap: 44px; position: absolute; left: 50%; transform: translateX(-50%); }
+.nav-center a { font-size: 9.5px; letter-spacing: .28em; text-transform: uppercase; color: var(--ash); text-decoration: none; transition: color .3s; white-space: nowrap; }
+.nav-center a:hover, .nav-center a.active { color: var(--ink); }
+.nav-center a.active { border-bottom: 1px solid var(--bronze); padding-bottom: 2px; }
+.nav-right { display: none; gap: 24px; align-items: center; }
+.nav-right a { font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--ash); text-decoration: none; transition: color .3s; white-space: nowrap; }
+.nav-right a:hover { color: var(--bronze); }
+.hamburger { display: flex; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; z-index: 600; }
+.hamburger span { display: block; width: 24px; height: 1px; background: var(--ink); transition: transform .35s ease, opacity .35s ease, width .35s ease; transform-origin: center; }
+.mobile-menu { position: fixed; inset: 0; z-index: 550; background: var(--bone); display: flex; flex-direction: column; justify-content: center; padding: 80px var(--pad-x); opacity: 0; pointer-events: none; transform: translateY(-12px); transition: opacity .4s ease, transform .4s ease; }
+.mobile-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.mobile-menu a { font-family: 'EB Garamond', serif; font-size: clamp(26px,6vw,40px); font-weight: 400; color: var(--ink); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--faint); letter-spacing: .04em; transition: color .3s, padding-left .3s; display: block; }
+.mobile-menu a:hover { color: var(--bronze); padding-left: 12px; }
+.mobile-menu-sub { margin-top: 36px; display: flex; gap: 28px; flex-wrap: wrap; }
+.mobile-menu-sub a { font-family: 'Tenor Sans', sans-serif; font-size: 9px; letter-spacing: .35em; text-transform: uppercase; color: var(--ash); border: none; padding: 0; font-size: 9px; }
+body.nav-open .hamburger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+body.nav-open .hamburger span:nth-child(2) { opacity: 0; width: 0; }
+body.nav-open .hamburger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+@media (min-width: 900px) { .nav-center { display: flex; } .nav-right { display: flex; } .hamburger { display: none; } .mobile-menu { display: none; } }
+
+/* PAGE HERO (inner pages) */
+.page-hero { padding: clamp(120px,18vw,180px) var(--pad-x) clamp(60px,8vw,100px); position: relative; overflow: hidden; border-bottom: 1px solid var(--faint); }
+.page-hero-eyebrow { font-size: 9px; letter-spacing: .44em; text-transform: uppercase; color: var(--bronze); margin-bottom: 24px; opacity: 0; animation: fadeSlide .8s ease .3s forwards; }
+.page-hero-title { font-family: 'EB Garamond', serif; font-size: clamp(42px,7vw,96px); font-weight: 400; line-height: .96; letter-spacing: -.01em; max-width: 780px; margin-bottom: 32px; opacity: 0; animation: fadeSlide .8s ease .5s forwards; }
+.page-hero-title em { font-style: italic; color: var(--bronze); }
+.page-hero-sub { font-size: clamp(11px,1.4vw,13px); line-height: 2; letter-spacing: .06em; color: var(--ash); max-width: 420px; opacity: 0; animation: fadeSlide .8s ease .7s forwards; }
+.page-hero-numeral { position: absolute; right: -10px; bottom: -40px; font-family: 'EB Garamond', serif; font-size: clamp(140px,20vw,320px); font-weight: 400; color: rgba(154,123,79,0.05); line-height: 1; pointer-events: none; user-select: none; letter-spacing: -.05em; }
+
+/* DIVIDER */
+.divider { display: flex; align-items: center; gap: 24px; padding: 0 var(--pad-x); }
+.divider-line { flex: 1; height: 1px; background: var(--faint); }
+.divider-mark { font-family: 'EB Garamond', serif; font-size: 10px; letter-spacing: .32em; color: var(--bronze); text-transform: uppercase; white-space: nowrap; }
+
+/* SECTION UTILITIES */
+.section { padding: clamp(64px,10vw,120px) var(--pad-x); }
+.section-label { font-size: 8.5px; letter-spacing: .44em; text-transform: uppercase; color: var(--bronze); margin-bottom: 20px; display: block; }
+.section-title { font-family: 'EB Garamond', serif; font-size: clamp(28px,3.8vw,52px); font-weight: 400; line-height: 1.1; }
+.section-title em { font-style: italic; color: var(--bronze); }
+
+/* BUTTONS */
+.btn-dark { font-size: 9px; letter-spacing: .32em; text-transform: uppercase; color: var(--bone); background: var(--ink); text-decoration: none; padding: 16px clamp(20px,3vw,40px); display: inline-block; transition: background .3s; white-space: nowrap; }
+.btn-dark:hover { background: var(--bronze); }
+.btn-ghost { font-size: 9px; letter-spacing: .28em; text-transform: uppercase; color: var(--ash); text-decoration: none; border-bottom: 1px solid var(--linen); padding-bottom: 4px; transition: color .3s, border-color .3s; white-space: nowrap; display: inline-block; }
+.btn-ghost:hover { color: var(--ink); border-color: var(--ink); }
+.btn-arrow { display: inline-flex; align-items: center; gap: 18px; font-size: 9.5px; letter-spacing: .35em; text-transform: uppercase; color: var(--ink); text-decoration: none; transition: gap .3s; }
+.btn-arrow::after { content: '——'; color: var(--bronze); font-size: 11px; }
+.btn-arrow:hover { gap: 28px; }
+
+/* FOOTER */
+footer { background: var(--ink); padding: clamp(52px,8vw,80px) var(--pad-x) clamp(28px,4vw,44px); }
+.footer-top { display: grid; grid-template-columns: 1fr; gap: 44px; padding-bottom: 44px; border-bottom: 1px solid rgba(247,243,238,.07); margin-bottom: 32px; }
+@media (min-width: 600px) { .footer-top { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 900px) { .footer-top { grid-template-columns: 2fr 1fr 1fr; } }
+.footer-logo { font-family: 'EB Garamond', serif; font-size: clamp(15px,2.5vw,20px); letter-spacing: .32em; color: var(--bone); text-decoration: none; display: block; margin-bottom: 16px; }
+.footer-logo span { color: var(--bronze); }
+.footer-line { font-size: 11px; color: rgba(156,148,136,.4); letter-spacing: .06em; line-height: 1.9; max-width: 260px; margin-bottom: 28px; }
+.footer-col h5 { font-size: 8px; letter-spacing: .42em; text-transform: uppercase; color: var(--bronze); margin-bottom: 18px; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 11px; }
+.footer-col a { font-size: 11px; color: rgba(156,148,136,.45); text-decoration: none; letter-spacing: .05em; transition: color .3s; }
+.footer-col a:hover { color: var(--bone); }
+.footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; }
+.footer-bottom p { font-size: 9px; letter-spacing: .13em; color: rgba(156,148,136,.28); }
+.footer-social { display: flex; flex-wrap: wrap; gap: 22px; }
+.footer-social a { font-size: 8.5px; letter-spacing: .28em; text-transform: uppercase; color: rgba(156,148,136,.28); text-decoration: none; transition: color .3s; }
+.footer-social a:hover { color: var(--bronze); }
+
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-l { opacity: 0; transform: translateX(-24px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+.reveal-l.visible { opacity: 1; transform: translateX(0); }
+
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+.process-section { padding: clamp(64px,10vw,120px) var(--pad-x); }
+.process-steps { display:grid; grid-template-columns:1fr; gap:0; }
+@media(min-width:768px){ .process-steps{ grid-template-columns:1fr 1fr; } }
+.process-step { padding:clamp(36px,4vw,56px); border-bottom:1px solid var(--faint); border-right:none; position:relative; }
+@media(min-width:768px){ .process-step:nth-child(odd){ border-right:1px solid var(--faint); } }
+.process-step:last-child,:process-step:nth-last-child(2) { border-bottom:none; }
+.step-num { font-family:'EB Garamond',serif; font-size:clamp(52px,6vw,80px); font-weight:400; color:rgba(154,123,79,.1); line-height:1; margin-bottom:16px; }
+.step-title { font-size:10px; letter-spacing:.28em; text-transform:uppercase; color:var(--ink); margin-bottom:12px; }
+.step-duration { font-size:8px; letter-spacing:.3em; text-transform:uppercase; color:var(--bronze); margin-bottom:16px; }
+.step-text { font-size:12px; line-height:1.9; color:var(--ash); letter-spacing:.03em; }
+.material-full { background:var(--ink); padding:clamp(64px,10vw,120px) var(--pad-x); }
+.material-row { display:grid; grid-template-columns:1fr; gap:clamp(32px,5vw,64px); align-items:center; padding:clamp(40px,5vw,64px) 0; border-bottom:1px solid rgba(247,243,238,.07); }
+@media(min-width:768px){ .material-row{ grid-template-columns:1fr 1fr; gap:80px; } .material-row:nth-child(even) .material-text{order:1;} .material-row:nth-child(even) .material-visual{order:2;} }
+.material-row:last-child { border:none; }
+.material-visual { aspect-ratio:4/3; background:rgba(255,255,255,.04); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+.material-visual::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 50%, rgba(154,123,79,.1) 0%, transparent 65%); }
+.material-label { font-size:8.5px; letter-spacing:.42em; text-transform:uppercase; color:var(--bronze); margin-bottom:20px; }
+.material-name { font-family:'EB Garamond',serif; font-size:clamp(24px,3vw,38px); font-weight:400; color:var(--bone); margin-bottom:20px; }
+.material-name em { font-style:italic; }
+.material-desc { font-size:12px; line-height:1.95; color:rgba(156,148,136,.6); letter-spacing:.04em; max-width:380px; }
+.workshop-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--faint); }
+@media(min-width:768px){ .workshop-grid{ grid-template-columns:repeat(4,1fr); } }
+.workshop-stat { background:var(--bone); padding:clamp(28px,3.5vw,48px) clamp(20px,3vw,36px); text-align:center; }
+.workshop-stat:hover { background:var(--paper); }
+.stat-num { font-family:'EB Garamond',serif; font-size:clamp(40px,5vw,64px); font-weight:400; color:var(--bronze); line-height:1; margin-bottom:8px; }
+.stat-label { font-size:8px; letter-spacing:.35em; text-transform:uppercase; color:var(--ash); }
+</style>
+</head>
+<body>
+<div id="cur"></div><div id="cur-circle"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="maison.html">Maison</a><a href="collections.html">Collections</a><a href="atelier.html">Atelier</a>
+  <a href="commissions.html">Commissions</a><a href="private-client.html">Private Client</a><a href="contact.html">Contact</a>
+  <div class="mobile-menu-sub"><a href="#">Instagram</a><a href="private-client.html">Reserve</a></div>
+</div>
+<nav id="nav">
+  <a class="logo" href="index.html">AURÈLE<sup>®</sup></a>
+  <div class="nav-center">
+    <a href="maison.html" class="">Maison</a>
+    <a href="collections.html" class="">Collections</a>
+    <a href="atelier.html" class="active">Atelier</a>
+    <a href="commissions.html" class="">Commissions</a>
+  </div>
+  <div class="nav-right"><a href="private-client.html">Private Client</a><a href="contact.html">Contact</a></div>
+  <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+</nav>
+
+<section class="page-hero">
+  <p class="page-hero-eyebrow">Via dei Serragli, Florence</p>
+  <h1 class="page-hero-title">Where every<br>piece is <em>born.</em></h1>
+  <p class="page-hero-sub">The same three-room workshop since 1961. The same light from the north-facing windows. The same smell of vegetable-tanned leather and beeswax.</p>
+  <div class="page-hero-numeral">1961</div>
+</section>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-mark">The Workshop</div><div class="divider-line"></div></div>
+
+<section style="padding:clamp(64px,8vw,100px) var(--pad-x)">
+  <div class="workshop-grid">
+    <div class="workshop-stat stagger-item reveal"><div class="stat-num">4</div><div class="stat-label">Artisans</div></div>
+    <div class="workshop-stat stagger-item reveal"><div class="stat-num">65</div><div class="stat-label">Years in operation</div></div>
+    <div class="workshop-stat stagger-item reveal"><div class="stat-num">12</div><div class="stat-label">Pieces per year</div></div>
+    <div class="workshop-stat stagger-item reveal"><div class="stat-num">60</div><div class="stat-label">Days to tan the leather</div></div>
+  </div>
+</section>
+
+<section class="process-section">
+  <span class="section-label reveal">How We Work</span>
+  <h2 class="section-title reveal" style="margin-bottom:clamp(40px,6vw,72px)">From hide to<br><em>finished object</em></h2>
+  <div class="process-steps">
+    <div class="process-step stagger-item reveal">
+      <div class="step-num">01</div>
+      <p class="step-title">Leather Selection</p>
+      <p class="step-duration">2–3 weeks</p>
+      <p class="step-text">Every hide is inspected in person at Conceria Walpier in Santa Croce. Céleste makes the journey herself, twice a year. A hide is selected for each piece based on its grain pattern, its thickness at the spine, and what she calls "its willingness to be something."</p>
+    </div>
+    <div class="process-step stagger-item reveal">
+      <div class="step-num">02</div>
+      <p class="step-title">Pattern & Cutting</p>
+      <p class="step-duration">3–5 days</p>
+      <p class="step-text">Marco Ferretti draws the pattern directly onto the leather in silver pen, reading the hide's natural topography. Panels are cut with a round knife — no machine, no die. The edges are immediately bevelled and burnished before they can absorb ambient moisture.</p>
+    </div>
+    <div class="process-step stagger-item reveal">
+      <div class="step-num">03</div>
+      <p class="step-title">Preparation</p>
+      <p class="step-duration">1–2 days</p>
+      <p class="step-text">Cut edges are treated with a first application of gum tragacanth and burnished warm with a wooden bone folder. Panels destined for lining are skived to a uniform 0.6mm on the flesh side. All surfaces are conditioned with a neatsfoot oil compound.</p>
+    </div>
+    <div class="process-step stagger-item reveal">
+      <div class="step-num">04</div>
+      <p class="step-title">Saddle Stitching</p>
+      <p class="step-duration">4–8 days</p>
+      <p class="step-text">Every stitch is made by hand using the Goubard two-needle method. Linen thread is waxed with a beeswax block before each session. Isabeau stitches at 8 stitches per centimetre — twice the industry standard. Each stitch is locked individually. There is no bobbin to unravel.</p>
+    </div>
+    <div class="process-step stagger-item reveal">
+      <div class="step-num">05</div>
+      <p class="step-title">Hardware Setting</p>
+      <p class="step-duration">1–2 days</p>
+      <p class="step-text">All hardware is sourced from a family foundry in Arezzo and plated to specification. Tomás sets each piece using a custom jig to achieve exact alignment. He checks the action of every clasp and strap attachment against a torque specification he developed himself over nine years.</p>
+    </div>
+    <div class="process-step stagger-item reveal">
+      <div class="step-num">06</div>
+      <p class="step-title">Edge Finishing</p>
+      <p class="step-duration">2–4 days</p>
+      <p class="step-text">Yuki applies edge paint in layers — between twelve and eighteen coats depending on the leather weight — sanding between each application with progressively finer abrasive paper. The final coat is burnished with a heated wooden tool until the edge becomes a continuous, imperceptible transition from the face.</p>
+    </div>
+    <div class="process-step stagger-item reveal">
+      <div class="step-num">07</div>
+      <p class="step-title">Conditioning & Review</p>
+      <p class="step-duration">3–5 days</p>
+      <p class="step-text">The finished piece rests for three days before Céleste reviews it. She examines every centimetre under a magnifying loupe. If a stitch is proud by more than 0.1mm, the section is re-done. There is no such thing as close enough.</p>
+    </div>
+    <div class="process-step stagger-item reveal">
+      <div class="step-num">08</div>
+      <p class="step-title">Signing &amp; Certification</p>
+      <p class="step-duration">1 day</p>
+      <p class="step-text">The artisan who completed the piece stamps their initials on the interior, beneath the lining pocket. A certificate of completion is hand-written, including the hide origin, the date of completion, and the name of the client it was made for. Then it is wrapped in unbleached cotton and sealed with wax.</p>
+    </div>
+  </div>
+</section>
+
+<section class="material-full">
+  <div style="max-width:900px;margin:0 auto">
+    <span class="section-label" style="color:var(--bronze)">What We Use</span>
+    <h2 class="section-title" style="color:var(--bone);margin-bottom:clamp(48px,6vw,72px)">Materials chosen<br>for <em>permanence</em></h2>
+    <div class="material-row">
+      <div class="material-visual reveal-l"><svg viewBox="0 0 280 200" width="200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="20" y="40" width="80" height="60" rx="2" fill="rgba(154,123,79,.15)" stroke="rgba(154,123,79,.2)" stroke-width="1"/>
+  <rect x="110" y="60" width="80" height="60" rx="2" fill="rgba(154,123,79,.1)" stroke="rgba(154,123,79,.15)" stroke-width="1"/>
+  <rect x="200" y="30" width="60" height="70" rx="2" fill="rgba(154,123,79,.12)" stroke="rgba(154,123,79,.18)" stroke-width="1"/>
+  <path d="M20 100 Q60 110 100 100" stroke="rgba(154,123,79,.3)" stroke-width="1" fill="none"/>
+  <path d="M110 120 Q150 130 190 120" stroke="rgba(154,123,79,.3)" stroke-width="1" fill="none"/>
+  <text x="140" y="170" text-anchor="middle" font-family="serif" font-size="9" fill="rgba(154,123,79,.4)" letter-spacing="3">SANTA CROCE SULL'ARNO</text>
+</svg></div>
+      <div class="material-text reveal">
+        <p class="material-label">Primary Material</p>
+        <h3 class="material-name">Vegetable-Tanned<br><em>Full-Grain Calfskin</em></h3>
+        <p class="material-desc">Sourced exclusively from Conceria Walpier in Santa Croce sull'Arno, Tuscany. Tanned over 60 days in pits of oak bark extract. Full-grain means the surface has never been sanded, corrected, or coated. Every mark the animal carried is present. Every mark you add becomes part of its character.</p>
+      </div>
+    </div>
+    <div class="material-row">
+      <div class="material-visual reveal-l"><svg viewBox="0 0 280 200" width="200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="40" y1="30" x2="40" y2="170" stroke="rgba(154,123,79,.4)" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="40" cy="28" rx="8" ry="5" fill="rgba(154,123,79,.3)"/>
+  <line x1="80" y1="50" x2="80" y2="170" stroke="rgba(154,123,79,.35)" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="80" cy="48" rx="6" ry="4" fill="rgba(154,123,79,.25)"/>
+  <line x1="120" y1="40" x2="120" y2="170" stroke="rgba(154,123,79,.3)" stroke-width="2" stroke-linecap="round"/>
+  <rect x="114" y="36" width="12" height="8" rx="1" fill="rgba(154,123,79,.2)"/>
+  <path d="M160 60 L175 170 L180 170 L165 60 Z" fill="rgba(154,123,79,.25)"/>
+  <path d="M156 58 L164 58 L168 52 L152 52 Z" fill="rgba(154,123,79,.3)"/>
+  <line x1="220" y1="30" x2="240" y2="170" stroke="rgba(154,123,79,.2)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="228" cy="26" r="6" fill="rgba(154,123,79,.2)"/>
+</svg></div>
+      <div class="material-text reveal">
+        <p class="material-label">Thread</p>
+        <h3 class="material-name">Beeswax-Treated<br><em>Linen Thread</em></h3>
+        <p class="material-desc">Four-strand linen thread from a mill in Vendôme, France. Waxed by hand before each stitching session — the heat of friction further embedding the wax. Where a machine stitch creates a single interlocking loop that fails along its entire length when broken, a hand saddle stitch locks each stitch individually. One broken stitch remains one broken stitch.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div>
+      <a class="footer-logo" href="index.html">AURÈLE <span>®</span></a>
+      <p class="footer-line">Maison de Maroquinerie. Florence, since 1961. Three pieces. Every quarter. Nothing more.</p>
+    </div>
+    <div class="footer-col"><h5>Maison</h5><ul><li><a href="maison.html">Our History</a></li><li><a href="atelier.html">The Atelier</a></li><li><a href="collections.html">Archive</a></li><li><a href="contact.html">Press</a></li></ul></div>
+    <div class="footer-col"><h5>Client</h5><ul><li><a href="private-client.html">Private Access</a></li><li><a href="commissions.html">Bespoke Commission</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Maison Aurèle. Florence. All rights reserved.</p>
+    <div class="footer-social"><a href="#">Instagram</a><a href="#">Weibo</a><a href="#">Private Telegram</a></div>
+  </div>
+</footer>
+<script>/* ── CURSOR ── */
+if (window.matchMedia('(pointer: fine)').matches) {
+  const cur = document.getElementById('cur');
+  const ring = document.getElementById('cur-circle');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  (function loop(){ cur.style.left=mx+'px'; cur.style.top=my+'px'; rx+=(mx-rx)*.1; ry+=(my-ry)*.1; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(loop); })();
+  document.querySelectorAll('a,button,input,select,textarea').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ ring.style.width='72px'; ring.style.height='72px'; ring.style.opacity='.2'; cur.style.opacity='0'; });
+    el.addEventListener('mouseleave',()=>{ ring.style.width='44px'; ring.style.height='44px'; ring.style.opacity='.6'; cur.style.opacity='1'; });
+  });
+}
+/* ── HAMBURGER ── */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+if(hamburger){ hamburger.addEventListener('click', () => { document.body.classList.toggle('nav-open'); mobileMenu.classList.toggle('open'); }); }
+if(mobileMenu){ mobileMenu.querySelectorAll('a').forEach(a => { a.addEventListener('click', () => { document.body.classList.remove('nav-open'); mobileMenu.classList.remove('open'); }); }); }
+/* ── NAV PIN ── */
+window.addEventListener('scroll', () => { const n=document.getElementById('nav'); if(n) n.classList.toggle('pinned', scrollY>60); }, { passive: true });
+/* ── REVEALS ── */
+const io = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1 });
+document.querySelectorAll('.reveal,.reveal-l,.anim-item').forEach(el => io.observe(el));
+document.querySelectorAll('.stagger-item').forEach((el,i) => { el.style.transitionDelay=(i*0.1)+'s'; io.observe(el); });
+</script>
+</body></html>

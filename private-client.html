@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Client — AURÈLE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Tenor+Sans&display=swap" rel="stylesheet">
+<style>/* ═══════════════════════════════════════
+   AURÈLE — SHARED STYLES
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bone:      #F7F3EE;
+  --paper:     #EDE8E0;
+  --linen:     #E0D8CD;
+  --bronze:    #9A7B4F;
+  --bronze-lt: #C4A06A;
+  --ink:       #18140F;
+  --ash:       #9C9488;
+  --faint:     rgba(24,20,15,0.08);
+  --pad-x:     clamp(20px, 5vw, 64px);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: 'Tenor Sans', sans-serif; background: var(--bone); color: var(--ink); overflow-x: hidden; }
+img, svg { display: block; max-width: 100%; }
+
+/* CURSOR */
+#cur, #cur-circle { display: none; }
+@media (pointer: fine) {
+  body { cursor: none; }
+  #cur { display: block; position: fixed; pointer-events: none; z-index: 9999; width: 5px; height: 5px; background: var(--ink); border-radius: 50%; transform: translate(-50%,-50%); }
+  #cur-circle { display: block; position: fixed; pointer-events: none; z-index: 9998; width: 44px; height: 44px; border: 1px solid var(--bronze); border-radius: 50%; transform: translate(-50%,-50%); transition: width .3s, height .3s, opacity .3s; opacity: .6; }
+}
+
+/* GRAIN */
+body::after { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); pointer-events: none; z-index: 8000; mix-blend-mode: multiply; opacity: .5; }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 500; display: flex; align-items: center; justify-content: space-between; padding: 28px var(--pad-x); transition: padding .4s, background .4s, border-color .4s; border-bottom: 1px solid transparent; }
+nav.pinned { padding: 18px var(--pad-x); background: rgba(247,243,238,0.95); backdrop-filter: blur(16px) saturate(1.2); border-color: var(--faint); }
+.logo { font-family: 'EB Garamond', serif; font-size: clamp(14px,2.5vw,18px); letter-spacing: .36em; text-transform: uppercase; color: var(--ink); text-decoration: none; flex-shrink: 0; z-index: 600; }
+.logo sup { font-size: 8px; color: var(--bronze); letter-spacing: .1em; vertical-align: super; margin-left: 3px; }
+.nav-center { display: none; gap: 44px; position: absolute; left: 50%; transform: translateX(-50%); }
+.nav-center a { font-size: 9.5px; letter-spacing: .28em; text-transform: uppercase; color: var(--ash); text-decoration: none; transition: color .3s; white-space: nowrap; }
+.nav-center a:hover, .nav-center a.active { color: var(--ink); }
+.nav-center a.active { border-bottom: 1px solid var(--bronze); padding-bottom: 2px; }
+.nav-right { display: none; gap: 24px; align-items: center; }
+.nav-right a { font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--ash); text-decoration: none; transition: color .3s; white-space: nowrap; }
+.nav-right a:hover { color: var(--bronze); }
+.hamburger { display: flex; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; z-index: 600; }
+.hamburger span { display: block; width: 24px; height: 1px; background: var(--ink); transition: transform .35s ease, opacity .35s ease, width .35s ease; transform-origin: center; }
+.mobile-menu { position: fixed; inset: 0; z-index: 550; background: var(--bone); display: flex; flex-direction: column; justify-content: center; padding: 80px var(--pad-x); opacity: 0; pointer-events: none; transform: translateY(-12px); transition: opacity .4s ease, transform .4s ease; }
+.mobile-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.mobile-menu a { font-family: 'EB Garamond', serif; font-size: clamp(26px,6vw,40px); font-weight: 400; color: var(--ink); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--faint); letter-spacing: .04em; transition: color .3s, padding-left .3s; display: block; }
+.mobile-menu a:hover { color: var(--bronze); padding-left: 12px; }
+.mobile-menu-sub { margin-top: 36px; display: flex; gap: 28px; flex-wrap: wrap; }
+.mobile-menu-sub a { font-family: 'Tenor Sans', sans-serif; font-size: 9px; letter-spacing: .35em; text-transform: uppercase; color: var(--ash); border: none; padding: 0; font-size: 9px; }
+body.nav-open .hamburger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+body.nav-open .hamburger span:nth-child(2) { opacity: 0; width: 0; }
+body.nav-open .hamburger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+@media (min-width: 900px) { .nav-center { display: flex; } .nav-right { display: flex; } .hamburger { display: none; } .mobile-menu { display: none; } }
+
+/* PAGE HERO (inner pages) */
+.page-hero { padding: clamp(120px,18vw,180px) var(--pad-x) clamp(60px,8vw,100px); position: relative; overflow: hidden; border-bottom: 1px solid var(--faint); }
+.page-hero-eyebrow { font-size: 9px; letter-spacing: .44em; text-transform: uppercase; color: var(--bronze); margin-bottom: 24px; opacity: 0; animation: fadeSlide .8s ease .3s forwards; }
+.page-hero-title { font-family: 'EB Garamond', serif; font-size: clamp(42px,7vw,96px); font-weight: 400; line-height: .96; letter-spacing: -.01em; max-width: 780px; margin-bottom: 32px; opacity: 0; animation: fadeSlide .8s ease .5s forwards; }
+.page-hero-title em { font-style: italic; color: var(--bronze); }
+.page-hero-sub { font-size: clamp(11px,1.4vw,13px); line-height: 2; letter-spacing: .06em; color: var(--ash); max-width: 420px; opacity: 0; animation: fadeSlide .8s ease .7s forwards; }
+.page-hero-numeral { position: absolute; right: -10px; bottom: -40px; font-family: 'EB Garamond', serif; font-size: clamp(140px,20vw,320px); font-weight: 400; color: rgba(154,123,79,0.05); line-height: 1; pointer-events: none; user-select: none; letter-spacing: -.05em; }
+
+/* DIVIDER */
+.divider { display: flex; align-items: center; gap: 24px; padding: 0 var(--pad-x); }
+.divider-line { flex: 1; height: 1px; background: var(--faint); }
+.divider-mark { font-family: 'EB Garamond', serif; font-size: 10px; letter-spacing: .32em; color: var(--bronze); text-transform: uppercase; white-space: nowrap; }
+
+/* SECTION UTILITIES */
+.section { padding: clamp(64px,10vw,120px) var(--pad-x); }
+.section-label { font-size: 8.5px; letter-spacing: .44em; text-transform: uppercase; color: var(--bronze); margin-bottom: 20px; display: block; }
+.section-title { font-family: 'EB Garamond', serif; font-size: clamp(28px,3.8vw,52px); font-weight: 400; line-height: 1.1; }
+.section-title em { font-style: italic; color: var(--bronze); }
+
+/* BUTTONS */
+.btn-dark { font-size: 9px; letter-spacing: .32em; text-transform: uppercase; color: var(--bone); background: var(--ink); text-decoration: none; padding: 16px clamp(20px,3vw,40px); display: inline-block; transition: background .3s; white-space: nowrap; }
+.btn-dark:hover { background: var(--bronze); }
+.btn-ghost { font-size: 9px; letter-spacing: .28em; text-transform: uppercase; color: var(--ash); text-decoration: none; border-bottom: 1px solid var(--linen); padding-bottom: 4px; transition: color .3s, border-color .3s; white-space: nowrap; display: inline-block; }
+.btn-ghost:hover { color: var(--ink); border-color: var(--ink); }
+.btn-arrow { display: inline-flex; align-items: center; gap: 18px; font-size: 9.5px; letter-spacing: .35em; text-transform: uppercase; color: var(--ink); text-decoration: none; transition: gap .3s; }
+.btn-arrow::after { content: '——'; color: var(--bronze); font-size: 11px; }
+.btn-arrow:hover { gap: 28px; }
+
+/* FOOTER */
+footer { background: var(--ink); padding: clamp(52px,8vw,80px) var(--pad-x) clamp(28px,4vw,44px); }
+.footer-top { display: grid; grid-template-columns: 1fr; gap: 44px; padding-bottom: 44px; border-bottom: 1px solid rgba(247,243,238,.07); margin-bottom: 32px; }
+@media (min-width: 600px) { .footer-top { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 900px) { .footer-top { grid-template-columns: 2fr 1fr 1fr; } }
+.footer-logo { font-family: 'EB Garamond', serif; font-size: clamp(15px,2.5vw,20px); letter-spacing: .32em; color: var(--bone); text-decoration: none; display: block; margin-bottom: 16px; }
+.footer-logo span { color: var(--bronze); }
+.footer-line { font-size: 11px; color: rgba(156,148,136,.4); letter-spacing: .06em; line-height: 1.9; max-width: 260px; margin-bottom: 28px; }
+.footer-col h5 { font-size: 8px; letter-spacing: .42em; text-transform: uppercase; color: var(--bronze); margin-bottom: 18px; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 11px; }
+.footer-col a { font-size: 11px; color: rgba(156,148,136,.45); text-decoration: none; letter-spacing: .05em; transition: color .3s; }
+.footer-col a:hover { color: var(--bone); }
+.footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; }
+.footer-bottom p { font-size: 9px; letter-spacing: .13em; color: rgba(156,148,136,.28); }
+.footer-social { display: flex; flex-wrap: wrap; gap: 22px; }
+.footer-social a { font-size: 8.5px; letter-spacing: .28em; text-transform: uppercase; color: rgba(156,148,136,.28); text-decoration: none; transition: color .3s; }
+.footer-social a:hover { color: var(--bronze); }
+
+/* REVEALS */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-l { opacity: 0; transform: translateX(-24px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+.reveal-l.visible { opacity: 1; transform: translateX(0); }
+
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+.benefits-grid { display:grid; grid-template-columns:1fr; gap:1px; background:var(--faint); }
+@media(min-width:600px){ .benefits-grid{ grid-template-columns:1fr 1fr; } }
+@media(min-width:900px){ .benefits-grid{ grid-template-columns:repeat(3,1fr); } }
+.benefit-card { background:var(--bone); padding:clamp(32px,4vw,52px); transition:background .3s; }
+.benefit-card:hover { background:var(--paper); }
+.benefit-rule { width:32px; height:1px; background:var(--bronze); margin-bottom:24px; opacity:.6; }
+.benefit-title { font-size:9.5px; letter-spacing:.25em; text-transform:uppercase; margin-bottom:12px; }
+.benefit-text { font-size:12px; line-height:1.9; color:var(--ash); }
+.client-stories { background:var(--ink); padding:clamp(64px,10vw,120px) var(--pad-x); }
+.story-grid { display:grid; grid-template-columns:1fr; gap:clamp(36px,4vw,56px); margin-top:56px; }
+@media(min-width:768px){ .story-grid{ grid-template-columns:1fr 1fr; } }
+.story-card { border-top:1px solid rgba(247,243,238,.1); padding-top:36px; }
+.story-stars { color:var(--bronze); letter-spacing:6px; font-size:11px; margin-bottom:20px; }
+.story-quote { font-family:'EB Garamond',serif; font-size:clamp(16px,2vw,22px); font-weight:400; font-style:italic; line-height:1.6; color:var(--bone); margin-bottom:20px; }
+.story-author { font-size:8.5px; letter-spacing:.28em; text-transform:uppercase; color:rgba(156,148,136,.45); }
+.apply-section { padding:clamp(64px,10vw,120px) var(--pad-x); background:var(--paper); }
+.apply-grid { display:grid; grid-template-columns:1fr; gap:clamp(48px,6vw,80px); }
+@media(min-width:768px){ .apply-grid{ grid-template-columns:1fr 1fr; align-items:start; } }
+.field-group { display:flex; flex-direction:column; border-bottom:1px solid rgba(24,20,15,.12); margin-bottom:22px; padding-bottom:12px; }
+.field-group label { font-size:7.5px; letter-spacing:.38em; text-transform:uppercase; color:var(--bronze); margin-bottom:8px; }
+.field-group input,.field-group select { background:none; border:none; outline:none; font-family:'EB Garamond',serif; font-size:16px; color:var(--ink); letter-spacing:.04em; -webkit-appearance:none; }
+.field-group input::placeholder { color:var(--linen); }
+.form-submit-btn { display:inline-flex; align-items:center; gap:18px; background:none; border:none; cursor:pointer; font-family:'Tenor Sans',sans-serif; font-size:9px; letter-spacing:.33em; text-transform:uppercase; color:var(--ink); padding:0; transition:gap .3s; margin-top:12px; }
+.form-submit-btn::after { content:'——'; color:var(--bronze); font-size:11px; }
+.form-submit-btn:hover { gap:28px; }
+</style>
+</head>
+<body>
+<div id="cur"></div><div id="cur-circle"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="maison.html">Maison</a><a href="collections.html">Collections</a><a href="atelier.html">Atelier</a>
+  <a href="commissions.html">Commissions</a><a href="private-client.html">Private Client</a><a href="contact.html">Contact</a>
+  <div class="mobile-menu-sub"><a href="#">Instagram</a><a href="private-client.html">Reserve</a></div>
+</div>
+<nav id="nav">
+  <a class="logo" href="index.html">AURÈLE<sup>®</sup></a>
+  <div class="nav-center">
+    <a href="maison.html" class="">Maison</a>
+    <a href="collections.html" class="">Collections</a>
+    <a href="atelier.html" class="">Atelier</a>
+    <a href="commissions.html" class="">Commissions</a>
+  </div>
+  <div class="nav-right"><a href="private-client.html">Private Client</a><a href="contact.html">Contact</a></div>
+  <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+</nav>
+
+<section class="page-hero">
+  <p class="page-hero-eyebrow">By Introduction Only</p>
+  <h1 class="page-hero-title">The Private<br><em>Client Programme</em></h1>
+  <p class="page-hero-sub">A small number of clients are invited into a closer relationship with Aurèle. First access. Direct correspondence. An annual review with Céleste. And the knowledge that a piece is being made with you in mind.</p>
+  <div class="page-hero-numeral">40</div>
+</section>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-mark">What It Means</div><div class="divider-line"></div></div>
+
+<section class="section">
+  <span class="section-label reveal">Programme Benefits</span>
+  <h2 class="section-title reveal" style="margin-bottom:clamp(40px,6vw,72px)">Not membership.<br><em>Relationship.</em></h2>
+  <div class="benefits-grid">
+    <div class="benefit-card stagger-item reveal">
+      <div class="benefit-rule"></div>
+      <p class="benefit-title">First Access</p>
+      <p class="benefit-text">Private clients receive notification of new quarterly pieces fourteen days before public announcement. During this window, pieces may be reserved privately — no public competition.</p>
+    </div>
+    <div class="benefit-card stagger-item reveal">
+      <div class="benefit-rule"></div>
+      <p class="benefit-title">Annual Conversation</p>
+      <p class="benefit-text">Once a year, Céleste personally contacts each private client to understand how their pieces are wearing, what their life now requires, and whether a commission might be worth exploring.</p>
+    </div>
+    <div class="benefit-card stagger-item reveal">
+      <div class="benefit-rule"></div>
+      <p class="benefit-title">Commission Priority</p>
+      <p class="benefit-text">All four annual bespoke commission slots are offered to private clients before anyone else. If declined, they are opened to the public waitlist. Private clients have taken all four slots in every year since 2018.</p>
+    </div>
+    <div class="benefit-card stagger-item reveal">
+      <div class="benefit-rule"></div>
+      <p class="benefit-title">Atelier Visits</p>
+      <p class="benefit-text">Private clients are welcome in the atelier on Via dei Serragli by appointment. You may observe work in progress, discuss materials with the artisans, and — if a commission is underway — be present for any stage of its making.</p>
+    </div>
+    <div class="benefit-card stagger-item reveal">
+      <div class="benefit-rule"></div>
+      <p class="benefit-title">Lifetime Restoration</p>
+      <p class="benefit-text">All clients receive lifetime restoration for any piece purchased. Private clients additionally receive an annual conditioning service — your pieces are collected, treated, and returned at no charge.</p>
+    </div>
+    <div class="benefit-card stagger-item reveal">
+      <div class="benefit-rule"></div>
+      <p class="benefit-title">Direct Correspondence</p>
+      <p class="benefit-text">No ticketing systems, no customer service queues. Private clients correspond directly with Céleste or, for atelier matters, with Marco. A mobile number is provided. It is answered.</p>
+    </div>
+  </div>
+</section>
+
+<section class="client-stories">
+  <span class="section-label reveal" style="color:var(--bronze)">From Our Clients</span>
+  <h2 class="section-title reveal" style="color:var(--bone)">What they <em>say</em></h2>
+  <div class="story-grid">
+    <div class="story-card stagger-item reveal">
+      <div class="story-stars">★★★★★</div>
+      <p class="story-quote">"I have purchased from every significant maison. None of them remember my name between seasons. Céleste remembers what I said about my grandmother's travelling case four years ago. That is the difference."</p>
+      <p class="story-author">— Isabelle M., Paris &nbsp;·&nbsp; Client since 2019</p>
+    </div>
+    <div class="story-card stagger-item reveal">
+      <div class="story-stars">★★★★★</div>
+      <p class="story-quote">"The tote I bought in 2021 has been to thirty-two countries. The leather has changed in a way that is impossible to describe — it has become mine in a way that nothing else I own has managed."</p>
+      <p class="story-author">— Naomi T., Tokyo &nbsp;·&nbsp; Client since 2021</p>
+    </div>
+    <div class="story-card stagger-item reveal">
+      <div class="story-stars">★★★★★</div>
+      <p class="story-quote">"When I visited the atelier, Marco showed me the stitching on my commission at 10x magnification and explained why he had chosen linen over silk thread for the pocket seam. I have never felt more confident in something I own."</p>
+      <p class="story-author">— Catherine L., London &nbsp;·&nbsp; Commission client 2023</p>
+    </div>
+    <div class="story-card stagger-item reveal">
+      <div class="story-stars">★★★★★</div>
+      <p class="story-quote">"My Aurèle flap was sent for its annual conditioning last spring. It came back with a note from Yuki explaining that she had noticed the edge paint on the strap was beginning to lift and had re-done it. I had not noticed."</p>
+      <p class="story-author">— Soo-Jin K., Seoul &nbsp;·&nbsp; Client since 2020</p>
+    </div>
+  </div>
+</section>
+
+<section class="apply-section">
+  <div class="apply-grid">
+    <div class="reveal">
+      <span class="section-label">Apply to Join</span>
+      <h2 class="section-title" style="margin-bottom:24px">Forty names.<br>One <em>conversation.</em></h2>
+      <p style="font-size:clamp(11.5px,1.3vw,13px);line-height:2;color:var(--ash);max-width:360px;margin-bottom:32px">We limit the programme to forty clients globally. When a position is available, we contact applicants who we believe will be well-suited to this kind of relationship. There are no tiers. No fees. No annual spend requirements.</p>
+      <p style="font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--ash)">Currently: 3 positions open</p>
+    </div>
+    <div class="reveal">
+      <div class="field-group"><label>Full Name</label><input type="text" placeholder="Your full name" autocomplete="name"></div>
+      <div class="field-group"><label>Email</label><input type="email" placeholder="Private email" autocomplete="email"></div>
+      <div class="field-group"><label>Country of Residence</label><input type="text" placeholder="Country"></div>
+      <div class="field-group"><label>How did you discover Aurèle?</label>
+        <select><option value="" disabled selected>Please select</option><option>Introduction from a client</option><option>The atelier, in person</option><option>Press or editorial</option><option>I own a piece already</option><option>Other</option></select>
+      </div>
+      <div class="field-group"><label>A note, if you'd like</label><input type="text" placeholder="Optional — anything you'd like us to know"></div>
+      <button class="form-submit-btn" type="button">Submit Application</button>
+      <p style="font-size:9px;color:var(--ash);letter-spacing:.06em;margin-top:20px;line-height:1.8">Céleste reviews all applications personally and responds within two weeks. Acceptance is based on our sense that the relationship will be mutual — not on purchase history or social profile.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div>
+      <a class="footer-logo" href="index.html">AURÈLE <span>®</span></a>
+      <p class="footer-line">Maison de Maroquinerie. Florence, since 1961. Three pieces. Every quarter. Nothing more.</p>
+    </div>
+    <div class="footer-col"><h5>Maison</h5><ul><li><a href="maison.html">Our History</a></li><li><a href="atelier.html">The Atelier</a></li><li><a href="collections.html">Archive</a></li><li><a href="contact.html">Press</a></li></ul></div>
+    <div class="footer-col"><h5>Client</h5><ul><li><a href="private-client.html">Private Access</a></li><li><a href="commissions.html">Bespoke Commission</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Maison Aurèle. Florence. All rights reserved.</p>
+    <div class="footer-social"><a href="#">Instagram</a><a href="#">Weibo</a><a href="#">Private Telegram</a></div>
+  </div>
+</footer>
+<script>/* ── CURSOR ── */
+if (window.matchMedia('(pointer: fine)').matches) {
+  const cur = document.getElementById('cur');
+  const ring = document.getElementById('cur-circle');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  (function loop(){ cur.style.left=mx+'px'; cur.style.top=my+'px'; rx+=(mx-rx)*.1; ry+=(my-ry)*.1; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(loop); })();
+  document.querySelectorAll('a,button,input,select,textarea').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ ring.style.width='72px'; ring.style.height='72px'; ring.style.opacity='.2'; cur.style.opacity='0'; });
+    el.addEventListener('mouseleave',()=>{ ring.style.width='44px'; ring.style.height='44px'; ring.style.opacity='.6'; cur.style.opacity='1'; });
+  });
+}
+/* ── HAMBURGER ── */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+if(hamburger){ hamburger.addEventListener('click', () => { document.body.classList.toggle('nav-open'); mobileMenu.classList.toggle('open'); }); }
+if(mobileMenu){ mobileMenu.querySelectorAll('a').forEach(a => { a.addEventListener('click', () => { document.body.classList.remove('nav-open'); mobileMenu.classList.remove('open'); }); }); }
+/* ── NAV PIN ── */
+window.addEventListener('scroll', () => { const n=document.getElementById('nav'); if(n) n.classList.toggle('pinned', scrollY>60); }, { passive: true });
+/* ── REVEALS ── */
+const io = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1 });
+document.querySelectorAll('.reveal,.reveal-l,.anim-item').forEach(el => io.observe(el));
+document.querySelectorAll('.stagger-item').forEach((el,i) => { el.style.transitionDelay=(i*0.1)+'s'; io.observe(el); });
+</script>
+</body></html>
